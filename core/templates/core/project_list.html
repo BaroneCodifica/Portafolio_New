@@ -1,0 +1,37 @@
+{% for project in projects %}
+<article class="bg-slate-800 border border-slate-700/60 rounded-xl overflow-hidden shadow-xl hover:border-cyan-500/50 transition-all duration-300 flex flex-col">
+    {% if project.image %}
+    <img src="{{ project.image.url }}" alt="{{ project.title }}" class="w-full h-48 object-cover">
+    {% endif %}
+    
+    <div class="p-6 flex-1 flex flex-col justify-between">
+        <div>
+            <h3 class="text-xl font-bold text-white mb-2">{{ project.title }}</h3>
+            <p class="text-slate-400 text-sm mb-4 line-clamp-3">{{ project.description }}</p>
+        </div>
+
+        <div>
+            <span class="inline-block bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1 rounded-md font-mono mb-4 border border-cyan-800/50">
+                {{ project.tech_stack }}
+            </span>
+            
+            <div class="flex items-center gap-4 text-sm font-medium pt-2 border-t border-slate-700/50">
+                {% if project.repo_url %}
+                <a href="{{ project.repo_url }}" target="_blank" class="text-slate-300 hover:text-cyan-400 transition-colors">
+                    GitHub &rarr;
+                </a>
+                {% endif %}
+                {% if project.live_url %}
+                <a href="{{ project.live_url }}" target="_blank" class="text-cyan-400 hover:text-cyan-300 transition-colors">
+                    Ver Demo &rarr;
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</article>
+{% empty %}
+<div class="col-span-full text-center py-12 text-slate-500">
+    <p class="text-lg">No se encontraron proyectos que coincidan con la búsqueda.</p>
+</div>
+{% endfor %}
