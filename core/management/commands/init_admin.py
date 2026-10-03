@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 
 class Command(BaseCommand):
-    help = 'Crea un superusuario automáticamente si no existe'
+    help = 'Crea o actualiza la contraseña del superusuario automáticamente'
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -12,11 +12,22 @@ class Command(BaseCommand):
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
         if not password:
-            self.stdout.write(self.style.WARNING('No se definió DJANGO_SUPERUSER_PASSWORD. Se omite la creación.'))
+            self.stdout.write(self.style.WARNING('No se definió DJANGO_SUPERUSER_PASSWORD.'))
             return
 
-        if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username=username, email=email, password=password)
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={'email': email, 'is_staff': True, 'is_superuser': True}
+        )
+
+        # Establece/Actualiza la contraseña siempre
+        user.set_password(password)
+        user.email = email
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+
+        if created:
             self.stdout.write(self.style.SUCCESS(f'Superusuario "{username}" creado con éxito.'))
         else:
-            self.stdout.write(self.style.SUCCESS(f'El superusuario "{username}" ya existe.'))
+            self.stdout.write(self.style.SUCCESS(f'Contraseña del superusuario "{username}" actualizada con éxito.'))
