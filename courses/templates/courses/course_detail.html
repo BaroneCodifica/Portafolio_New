@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.title }} | Academia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    {% include 'core/navbar.html' %}
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Encabezado del Curso -->
+        <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-2xl mb-10">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-cyan-950 text-cyan-400 text-xs font-mono px-3 py-1 rounded-md border border-cyan-500/30">
+                    {{ course.category.name }}
+                </span>
+                <span class="text-slate-400 text-xs">• {{ course.get_course_type_display }}</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">{{ course.title }}</h1>
+            <p class="text-slate-300 text-sm max-w-3xl leading-relaxed mb-6">{{ course.description }}</p>
+
+            <div class="flex items-center gap-4">
+                {% if course.course_type == 'free' %}
+                    <span class="text-emerald-400 font-bold text-xl">Gratuito</span>
+                {% else %}
+                    <span class="text-white font-bold text-2xl">${{ course.price }}</span>
+                {% endif %}
+                <button class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                    Inscribirse / Comprar
+                </button>
+            </div>
+        </div>
+
+        <!-- Temario / Lecciones -->
+        <h2 class="text-2xl font-bold text-white mb-6">Temario del Curso</h2>
+        <div class="space-y-3">
+            {% for lesson in course.lessons.all %}
+            <div class="bg-slate-800/40 border border-slate-700/50 p-4 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 h-8 rounded-lg bg-slate-700/50 text-cyan-400 font-mono text-sm flex items-center justify-center font-bold">
+                        {{ lesson.order }}
+                    </span>
+                    <span class="text-slate-200 text-sm font-medium">{{ lesson.title }}</span>
+                </div>
+                {% if lesson.is_free_preview %}
+                    <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-md">Vista Previa</span>
+                {% else %}
+                    <span class="text-slate-500 text-xs">Bloqueado</span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-slate-500 text-sm">No hay lecciones registradas en este curso todavía.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+</body>
+</html>
