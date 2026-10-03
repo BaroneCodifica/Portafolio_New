@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.db.models import Q
 from .models import Project, Visit
 from .forms import ProjectForm
+from courses.models import Course
+from courses.forms import CourseForm
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -95,4 +97,58 @@ def delete_project(request, pk):
         project.delete()
         projects = Project.objects.all()
         return render(request, 'core/dashboard_project_list.html', {'projects': projects})
+    return HttpResponse(status=400)
+
+
+
+
+# --- DASHBOARD: Vista de Cursos (CRUD) ---
+@login_required
+def dashboard_courses(request):
+    courses = Course.objects.all()
+    form = CourseForm()
+    context = {
+        'courses': courses,
+        'form': form,
+        'active_tab': 'courses'
+    }
+    return render(request, 'core/dashboard_courses.html', context)
+
+# --- DASHBOARD: Vista de Métricas Mejoradas ---
+@login_required
+def dashboard_metrics(request):
+    # Límite estricto de máximo 10 registros por tabla
+    portfolio_visits = Visit.objects.filter(path='/')[:10]
+    course_visits = Visit.objects.filter(path__startswith='/cursos/')[:10]
+    
+    total_visits = Visit.objects.count()
+    total_course_visits = Visit.objects.filter(path__startswith='/cursos/').count()
+
+    context = {
+        'portfolio_visits': portfolio_visits,
+        'course_visits': course_visits,
+        'total_visits': total_visits,
+        'total_course_visits': total_course_visits,
+        'active_tab': 'metrics'
+    }
+    return render(request, 'core/dashboard_metrics.html', context)
+
+# --- Funciones CRUD HTMX para Cursos ---
+@login_required
+def create_course(request):
+    if request.method == 'POST':
+        form = CourseForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            courses = Course.objects.all()
+            return render(request, 'core/dashboard_course_list.html', {'courses': courses})
+    return HttpResponse(status=400)
+
+@login_required
+def delete_course(request, pk):
+    course = get_object_or_404(Course, pk=pk)
+    if request.method == 'POST':
+        course.delete()
+        courses = Course.objects.all()
+        return render(request, 'core/dashboard_course_list.html', {'courses': courses})
     return HttpResponse(status=400)

@@ -1,0 +1,29 @@
+{% for course in courses %}
+<tr class="hover:bg-slate-700/30 transition-colors border-b border-slate-800">
+    <td class="px-6 py-4 font-semibold text-white text-sm">{{ course.title }}</td>
+    <td class="px-6 py-4 text-xs font-mono text-cyan-400">{{ course.get_course_type_display }}</td>
+    <td class="px-6 py-4 text-xs font-bold text-slate-300">
+        {% if course.course_type == 'free' %}
+            <span class="text-emerald-400">Gratis</span>
+        {% else %}
+            ${{ course.price }}
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 text-right">
+        <button 
+            hx-post="{% url 'core:delete_course' course.id %}"
+            hx-target="#courses-table-body"
+            hx-confirm="¿Seguro que deseas eliminar el curso '{{ course.title }}'?"
+            class="text-xs text-rose-400 hover:text-rose-300 font-semibold transition-colors"
+        >
+            Eliminar
+        </button>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="px-6 py-8 text-center text-slate-500 text-sm">
+        No hay cursos registrados.
+    </td>
+</tr>
+{% endfor %}

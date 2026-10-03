@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Course, Category, Testimonial
 
+
+@login_required
 def academy_home(request):
     featured_courses = Course.objects.filter(is_published=True)[:6]
     categories = Category.objects.all()
