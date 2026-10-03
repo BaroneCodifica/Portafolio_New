@@ -1,0 +1,30 @@
+{% for project in projects %}
+<tr id="project-row-{{ project.id }}" class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
+    <td class="px-6 py-4 font-medium text-white">{{ project.title }}</td>
+    <td class="px-6 py-4 text-cyan-400 font-mono text-xs">{{ project.tech_stack }}</td>
+    <td class="px-6 py-4 text-slate-400 text-sm">{{ project.created_at|date:"d/m/Y" }}</td>
+    <td class="px-6 py-4 text-right flex justify-end gap-3">
+        <!-- Botón Editar -->
+        <button 
+            hx-get="{% url 'core:edit_project' project.id %}" 
+            hx-target="#modal-container"
+            class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+            Editar
+        </button>
+        <!-- Botón Eliminar -->
+        <button 
+            hx-post="{% url 'core:delete_project' project.id %}" 
+            hx-target="#crud-table-body"
+            hx-confirm="¿Seguro que deseas eliminar este proyecto?"
+            class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+            Eliminar
+        </button>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+        No tienes proyectos registrados en la base de datos.
+    </td>
+</tr>
+{% endfor %}

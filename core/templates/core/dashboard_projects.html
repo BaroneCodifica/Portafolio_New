@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Proyectos | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- NAVEGACIÓN Y PESTAÑAS -->
+    {% include 'core/dashboard_nav.html' %}
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+        <!-- Grid: Formulario de Creación + Tabla de Proyectos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Columna Izquierda: Formulario Crear -->
+            <div class="bg-slate-800 border border-slate-700/60 p-6 rounded-xl shadow-xl h-fit">
+                <h2 class="text-lg font-bold text-white mb-4">Agregar Nuevo Proyecto</h2>
+                
+                <form 
+                    hx-post="{% url 'core:create_project' %}" 
+                    hx-target="#crud-table-body"
+                    hx-encoding="multipart/form-data"
+                    class="space-y-4"
+                    hx-on::after-request="if(event.detail.successful) this.reset()"
+                >
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 rounded-lg transition-colors mt-4">
+                        Guardar Proyecto
+                    </button>
+                </form>
+            </div>
+
+            <!-- Columna Derecha: Tabla de Proyectos -->
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700/60 rounded-xl shadow-xl overflow-hidden">
+                <div class="p-6 border-b border-slate-700/60">
+                    <h2 class="text-lg font-bold text-white">Tus Proyectos</h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-900/50 text-xs uppercase text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="px-6 py-3">Título</th>
+                                <th class="px-6 py-3">Stack</th>
+                                <th class="px-6 py-3">Fecha</th>
+                                <th class="px-6 py-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crud-table-body">
+                            {% include 'core/dashboard_project_list.html' %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Contenedor dinámico para Modales (Editar) -->
+    <div id="modal-container"></div>
+
+</body>
+</html>

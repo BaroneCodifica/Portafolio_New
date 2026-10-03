@@ -16,3 +16,16 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class Visit(models.Model):
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)  # Navegador / Dispositivo
+    path = models.CharField(max_length=255, default='/')   # Página que visitó
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"Visita a {self.path} desde {self.ip_address} el {self.timestamp.strftime('%d/%m/%Y %H:%M')}"
