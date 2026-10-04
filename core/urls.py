@@ -16,4 +16,9 @@ urlpatterns = [
     path('dashboard/proyectos/crear/', views.create_project, name='create_project'),
     path('dashboard/proyectos/editar/<int:pk>/', views.edit_project, name='edit_project'),
     path('dashboard/proyectos/eliminar/<int:pk>/', views.delete_project, name='delete_project'),
+
+    # Rutas para la gestión de cursos
+    path('dashboard/cursos/', views.dashboard_courses, name='dashboard_courses'),
+    path('dashboard/cursos/crear/', views.create_course, name='create_course'),
+    path('dashboard/cursos/eliminar/<int:pk>/', views.delete_course, name='delete_course'),
 ]
