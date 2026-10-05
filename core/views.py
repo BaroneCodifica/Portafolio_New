@@ -1,11 +1,22 @@
+import logging
+import smtplib
+
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.db.models import Q
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .models import Project, Visit
-from .forms import ProjectForm
+from .forms import ContactForm, ProjectForm
 from courses.models import Course
 from courses.forms import CourseForm
+
+logger = logging.getLogger(__name__)
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -22,7 +33,52 @@ def index(request):
     Visit.objects.create(ip_address=ip, user_agent=user_agent, path=request.path)
 
     projects = Project.objects.all()
-    return render(request, 'core/index.html', {'projects': projects})
+    return render(request, 'core/index.html', {
+        'projects': projects,
+        'contact_form': ContactForm(),
+    })
+
+
+@require_POST
+def contact(request):
+    form = ContactForm(request.POST)
+    if not form.is_valid():
+        return render(request, 'core/index.html', {
+            'projects': Project.objects.all(),
+            'contact_form': form,
+        }, status=400)
+
+    name = form.cleaned_data['name']
+    sender = form.cleaned_data['email']
+    subject = form.cleaned_data['subject']
+    body = form.cleaned_data['message']
+    message_body = f"Mensaje de {name} <{sender}>\n\n{body}"
+
+    try:
+        sent_count = EmailMessage(
+            subject=f"[Portafolio] {subject}",
+            body=message_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[settings.CONTACT_EMAIL],
+            reply_to=[sender],
+        ).send(fail_silently=False)
+    except (OSError, smtplib.SMTPException):
+        logger.exception("No se pudo enviar un mensaje desde el formulario de contacto.")
+        messages.error(
+            request,
+            "No se pudo enviar tu mensaje en este momento. Inténtalo más tarde o escríbeme directamente por correo.",
+        )
+    else:
+        if sent_count != 1:
+            logger.error("El backend de correo no aceptó el mensaje del formulario de contacto.")
+            messages.error(
+                request,
+                "No se pudo confirmar el envío de tu mensaje. Inténtalo más tarde o escríbeme directamente por correo.",
+            )
+        else:
+            messages.success(request, "¡Gracias! Tu mensaje fue enviado correctamente.")
+
+    return redirect(f"{reverse('core:index')}#contacto")
 
 def search_projects(request):
     query = request.GET.get('search', '')

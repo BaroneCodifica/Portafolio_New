@@ -1,6 +1,56 @@
 from django import forms
 from .models import Project
 
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        label="Tu nombre",
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'autocomplete': 'name',
+            'placeholder': '¿Cómo te llamas?',
+        }),
+    )
+    email = forms.EmailField(
+        label="Tu correo",
+        widget=forms.EmailInput(attrs={
+            'autocomplete': 'email',
+            'placeholder': 'tu@correo.com',
+        }),
+    )
+    subject = forms.CharField(
+        label="Asunto",
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'placeholder': '¿En qué puedo ayudarte?',
+        }),
+    )
+    message = forms.CharField(
+        label="Mensaje",
+        max_length=5000,
+        widget=forms.Textarea(attrs={
+            'rows': 5,
+            'placeholder': 'Cuéntame un poco sobre tu idea o proyecto...',
+        }),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = (
+                'mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 '
+                'px-4 py-3 text-sm text-white placeholder:text-slate-500 '
+                'outline-none transition focus:border-cyan-400 focus:ring-2 '
+                'focus:ring-cyan-400/20'
+            )
+
+    def clean_subject(self):
+        subject = self.cleaned_data['subject']
+        if '\r' in subject or '\n' in subject:
+            raise forms.ValidationError("El asunto debe ocupar una sola línea.")
+        return subject
+
+
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project

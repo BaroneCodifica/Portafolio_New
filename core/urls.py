@@ -5,6 +5,7 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('contacto/', views.contact, name='contact'),
     path('search/', views.search_projects, name='search_projects'),
     
     # Rutas del Dashboard
